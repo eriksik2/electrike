@@ -1,0 +1,14 @@
+{
+  "name": "electrike",
+  "version": "0.0.1",
+  "description": "A demo of the Firebase real-time database",
+  "main": "electrike-local/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Erik Sik, Gustav Nolgren, Isak Almgren, Johan Winman, Kirill Pavlov, Viktor Ytterborn",
+  "license": "MIT",
+  "dependencies": {
+    "firebase-admin": "^9.5.0"
+  }
+}
