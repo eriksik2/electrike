@@ -4,12 +4,12 @@
 The demo is divided into two applications: A webapp, and an app running on the local machine.
 
 
-## webapp
+## The web app
 The webapp requires no dependencies. To run it just open `electrike-remote/index.html` in a web browser.
 
 The webapp does not have privilages to make changes in the database, so it does not require a private key.
 
-## local app
+## The local app
 The local app requires nodejs and npm to run, aswell as a private key to authenticate yourself as an owner of the database (See next section).
 
 Start by installing nodejs and npm using your favourite package manager.
