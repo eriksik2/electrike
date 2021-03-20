@@ -26,7 +26,7 @@ async function main() {
         var value = counter.val();
         if(value === undefined) value = 0;
 
-        await counter_ref.set(value + 1);
+        await counter_ref.set(value - 10);
     }
 }
 

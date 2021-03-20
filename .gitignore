@@ -1,4 +1,5 @@
 
+.vscode/
 node_modules/
 
 private-key.json

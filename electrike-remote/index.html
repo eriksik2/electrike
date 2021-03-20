@@ -1,18 +1,100 @@
-
 <html>
-    <head>
-        <meta charset="UTF-8">
 
-        <!-- The Firebase SDK -->
-        <script src="https://www.gstatic.com/firebasejs/8.3.0/firebase-app.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/8.3.0/firebase-database.js"></script>
-    </head>
+<head>
+    <meta charset="UTF-8">
 
-    <body>
-        <!-- The span node with id "counter-node" is referenced inside our main script index.js -->
-        Counter: <span id="counter-node">0</span>
+    <!-- The Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.3.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.0/firebase-database.js"></script>
 
-        <!-- Our main script is placed at the bottom of the document so that everything is loaded when it runs -->
-        <script src="index.js"></script>
-    </body>
+    <!-- Jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script src="init-database.js"></script>
+    <script src="realtime.js"></script>
+</head>
+
+<body>
+
+    <form>
+        <p>Add order</p>
+        <label>Order id
+            <input type="number" id="orderId">
+        </label>
+        <br>
+        <label>Product
+            <select id="addOrderProductId"></select>
+            <script>
+                onRealtimeProduct((ProductId, value) => {
+                    $(`#addOrderProductId > option[value=${ProductId}]`).remove();
+                    if(value != null) $("#addOrderProductId").append(`
+                        <option value="${ProductId}"> ${value.ProductCode} </option>
+                    `);
+                });
+            </script>
+        </label>
+        <br>
+        <label>Quantity
+            <input type="number" id="quantity">
+        </label>
+        <br>
+        <button id="addOrderBtn">Add</button>
+    </form>
+
+    <form>
+        <p>Add product</p>
+        <label>Product ID
+            <input type="number" id="addProdId">
+        </label>
+        <br>
+        <label>Product Code
+            <input type="number" id="addProdCode">
+        </label>
+        <br>
+        <label>Quantity
+            <input type="number" id="addProdQuantity">
+        </label>
+        <br>
+        <label>Price
+            <input type="number" id="addProdPrice">
+        </label>
+        <br>
+        <button id="addProductBtn">Add product</button>
+    </form>
+
+    <form>
+        <p>Add suplier</p>
+        <label>Supplier ID
+            <input type="number" id="supplierId">
+        </label>
+        <br>
+        <label>Name
+            <input type="text" id="supplierName">
+        </label>
+        <br>
+        <label>Phone
+            <input type="number" id="supplierNumber">
+        </label>
+        <br>
+        <button id="addSupplierBtn">Add supplier</button>
+    </form>
+    
+    <form>
+        <p>Add product supplier</p>
+        <label>ProductId
+            <input type="number" id="productSupplierProductId">
+        </label>
+        <br>
+        <label>SupplierID
+            <input type="number" id="productSupplierSupplierId">
+        </label>
+        <br>
+        <button id="addProductSupplierBtn">Add Product Supplier</button>
+    </form>
+
+    <!-- Our main script is placed at the bottom of the document so that everything is loaded when it runs -->
+    <script src="tempName.js"></script>
+    <script src="function.js"></script>
+</body>
+
 </html>
