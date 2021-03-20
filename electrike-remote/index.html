@@ -12,7 +12,18 @@
         <!-- The span node with id "counter-node" is referenced inside our main script index.js -->
         Counter: <span id="counter-node">0</span>
 
+        <form>
+            <label for="orderId">Order ID</label><br>
+            <input type="text" name="orderId" id="orderId"><br>
+            <label for="productId">Product ID</label><br>
+            <input type="text" name="productId" id="productId"><br>
+            <label for="quantity">Quantity</label><br>
+            <input type="number" name="quantity" id="quantity"><br>
+            <button id="addBtn">Add</button>
+        </form>
+
         <!-- Our main script is placed at the bottom of the document so that everything is loaded when it runs -->
         <script src="index.js"></script>
+        <script src="function.js"></script>
     </body>
 </html>
