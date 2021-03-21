@@ -30,16 +30,12 @@
             var updateNumProducts = amnt => $(".NumProducts").html(num_products = num_products + amnt);
             var updateNumOrders = amnt => $(".NumOrders").html(num_Orders = num_Orders + amnt);
             var updateNumSuppliers = amnt => $(".NumSuppliers").html(num_Suppliers = num_Suppliers + amnt);
-            database.ref("Product").on("child_added", child => {
-                updateNumProducts(1);
-                updateNumOrders(1);
-                updateNumSuppliers(1);
-            });
-            database.ref("Product").on("child_removed", child => {
-                updateNumProducts(-1);
-                updateNumOrders(-1);
-                updateNumSuppliers(-1);
-            });
+            database.ref("Product").on("child_added", child => updateNumProducts(1));
+            database.ref("Product").on("child_removed", child => updateNumProducts(-1));
+            database.ref("Order").on("child_added", child => updateNumOrders(1));
+            database.ref("Order").on("child_removed", child => updateNumOrders(-1));
+            database.ref("Supplier").on("child_added", child => updateNumSuppliers(1));
+            database.ref("Supplier").on("child_removed", child => updateNumSuppliers(-1));
         </script>
     </div>
 

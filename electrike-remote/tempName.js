@@ -15,7 +15,7 @@ async function getProductList() {
 }
 
 async function addOrder(orderid, productid, quantity) {
-    var db_ref = database.ref("/Orders/" + orderid);
+    var db_ref = database.ref("/Order/" + orderid);
     var order = (await db_ref.get()).val();
     if(order != null) {
         alert("Changed order with orderid "+orderid);
