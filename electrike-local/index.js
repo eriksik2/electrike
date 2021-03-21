@@ -16,11 +16,10 @@ function genRandomName() {
 
 
 async function addRandomOrder(db) {
-    var product = await getRandom(db, "Product");
-    if(product == null) return;
-    var quantity = randomRange(1, product.Quantity);
+    var product = randomRange(0, 999999);
+    var quantity = randomRange(1, 200);
     await addRandom(db, "Order", {
-        ProductId: product.ProductId,
+        ProductId: product,
         quantity: quantity
     });
 }
@@ -46,10 +45,8 @@ async function addRandomSupplier(db) {
 }
 
 async function addRandomProductSupplier(db) {
-    var product = await getRandomId(db, "Product");
-    if(product == null) return;
-    var supplier = await getRandomId(db, "Supplier");
-    if(supplier == null) return;
+    var product = randomRange(0, 999999);
+    var supplier = randomRange(0, 999999);
     await addRandom(db, "ProductSupplier", {
         ProductId: product,
         SupplierId: supplier,
@@ -57,57 +54,12 @@ async function addRandomProductSupplier(db) {
 }
 
 async function addRandom(db, dir_name, value) {
-    var id = await getUnusedId(db, dir_name);
-    if(id == null) return await replaceRandom(db, dir_name, value);
+    var id = randomRange(0, 999999);
     value[dir_name + "Id"] = id;
     var db_ref = db.ref("/"+dir_name+"/"+id);
     await db_ref.set(value);
 }
 
-async function replaceRandom(db, dir_name, value) {
-    var id = await getRandomId(db, dir_name);
-    if(id == null) return await addRandom(db, dir_name, value);
-    value[dir_name + "Id"] = id;
-    var db_ref = db.ref("/"+dir_name+"/"+id);
-    await db_ref.set(value);
-}
-
-async function removeRandom(db, dir_name) {
-    await replaceRandom(db, dir_name, null);
-}
-
-
-async function getRandom(db, dir_name) {
-    var db_ref = db.ref("/" + dir_name);
-    var items = (await db_ref.get()).val();
-    if(items == null) return null;
-    var keys = Object.keys(items);
-    if(keys.length == 0) return null;
-    var key = keys[randomRange(0, keys.length)];
-    return items[key];
-}
-
-async function getRandomId(db, dir_name) {
-    var db_ref = db.ref("/" + dir_name);
-    var items = (await db_ref.get()).val();
-    if(items == null) return null;
-    var keys = Object.keys(items);
-    if(keys.length == 0) return null;
-    var key = keys[randomRange(0, keys.length)];
-    return key;
-}
-
-async function getUnusedId(db, dir_name) {
-    var db_ref = db.ref("/" + dir_name);
-    var items = (await db_ref.get()).val();
-    if(items == null) return randomRange(0, 999999);
-    var keys = Object.keys(items);
-    if(keys.length >= 999999) return null;
-    while(true) {
-        var orderid = randomRange(0, 999999);
-        if(keys.find(key => key == orderid) === undefined) return orderid;
-    }
-}
 
 async function main() {
     // Initialize the app with the url to our database and a private key.

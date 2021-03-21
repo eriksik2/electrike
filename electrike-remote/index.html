@@ -11,10 +11,37 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <script src="init-database.js"></script>
-    <script src="realtime.js"></script>
 </head>
 
 <body>
+
+    <div> <!-- Table that shows how many products, orders, and suppliers there are in realtime. -->
+        <table>
+            <td>Products: <span class="NumProducts">0</span></td>
+            <td>|</td>
+            <td>Orders: <span class="NumOrders">0</span></td>
+            <td>|</td>
+            <td>Suppliers: <span class="NumSuppliers">0</span></td>
+        </table>
+        <script>
+            var num_products = 0;
+            var num_Orders = 0;
+            var num_Suppliers = 0;
+            var updateNumProducts = amnt => $(".NumProducts").html(num_products = num_products + amnt);
+            var updateNumOrders = amnt => $(".NumOrders").html(num_Orders = num_Orders + amnt);
+            var updateNumSuppliers = amnt => $(".NumSuppliers").html(num_Suppliers = num_Suppliers + amnt);
+            database.ref("Product").on("child_added", child => {
+                updateNumProducts(1);
+                updateNumOrders(1);
+                updateNumSuppliers(1);
+            });
+            database.ref("Product").on("child_removed", child => {
+                updateNumProducts(-1);
+                updateNumOrders(-1);
+                updateNumSuppliers(-1);
+            });
+        </script>
+    </div>
 
     <form>
         <p>Add order</p>
@@ -25,11 +52,11 @@
         <label>Product
             <select id="addOrderProductId"></select>
             <script>
-                onRealtimeProduct((ProductId, value) => {
-                    $(`#addOrderProductId > option[value=${ProductId}]`).remove();
-                    if(value != null) $("#addOrderProductId").append(`
-                        <option value="${ProductId}"> ${value.ProductCode} </option>
-                    `);
+                database.ref("Product").on("child_added", data => {
+                    $("#addOrderProductId").append(`<option value="${data.val().ProductId}"> ${data.val().ProductCode} </option>`);
+                });
+                database.ref("Product").on("child_removed", data => {
+                    $(`#addOrderProductId > option[value=${data.val().ProductId}]`).remove();
                 });
             </script>
         </label>
