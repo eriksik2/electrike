@@ -78,6 +78,17 @@ async function add(db, dir_name, value) {
     await db_ref.set(value);
 }
 
+async function getRandomId(db, dir_name) {
+    var items = (await db.ref("/"+dir_name).limitToFirst(10).get()).val();
+    var keys = Object.keys(items).filter(key => key !== "NextId");
+    return keys[randomRange(0, keys.length)];
+}
+
+async function remove(db, dir_name, id) {
+    await db.ref("/"+dir_name+"/"+id).set(null);
+}
+
+
 
 async function main() {
     console.log("Starting...");
@@ -94,13 +105,16 @@ async function main() {
     const rl = readline.createInterface(process.stdin);
 
     var extra_prompt = [];
+    var flushExtra = () => {
+        console.log(...extra_prompt);
+        extra_prompt = [];
+    };
     var promptNext = (...args) => {
         if(extra_prompt.length > 0) extra_prompt.push("\n");
         extra_prompt.push(...args);
     };
     var doPrompt = () => {
-        console.log(...extra_prompt);
-        extra_prompt = [];
+        flushExtra();
         process.stdout.write(">> ");
     };
     var doInitPrompt = () => {
@@ -113,10 +127,11 @@ async function main() {
         console.log("\t Remove a random item.");
         console.log(" watch new [item]");
         console.log("\t Print out the next item that gets added.");
+        console.log(" watch remove [item]");
+        console.log("\t Print out the next item that gets removed.");
         console.log(" [item] can be one of:");
         console.log("\t order | product | supplier | product supplier");
-        console.log("\t ord   | prod    | supp     | ps");
-        console.log("\t o     | p       | s        |");
+        console.log("\t o     | p       | s        | ps");
     };
     var doFailPrompt = () => {
         doInitPrompt();
@@ -125,9 +140,10 @@ async function main() {
     console.clear();
     doInitPrompt();
     doPrompt();
+    var did_batch_last = false;
     for await(var line of rl) {
         line = line.toLowerCase();
-        var regex = line.match(/^\s*(?:(new|remove|watch new)\s*(order|product|supplier|product supplier|ord|prod|supp|ps|o|p|s)|help)\s*$/);
+        var regex = line.match(/^\s*(?:(new|remove|watch new|watch remove)\s*(order|product|supplier|product supplier|o|p|s|ps)|help)\s*(forever|[0-9]+\s*times)?\s*$/);
         if(regex === null) {
             console.clear();
             doFailPrompt();
@@ -142,49 +158,70 @@ async function main() {
         }
         var action = regex[1];
         var item = regex[2];
+        var reps = regex[3] || 1;
+        var do_forever = reps === "forever";
+        reps = parseInt(reps);
+        var interactive = reps == 1;
         var dir_name;
         switch(item) {
             case "order":
-            case "ord":
             case "o": dir_name = "Order"; break;
             case "product":
-            case "prod":
             case "p": dir_name = "Product"; break;
             case "supplier":
-            case "supp":
             case "s": dir_name = "Supplier"; break;
             case "product supplier":
             case "ps": dir_name = "ProductSupplier"; break;
             default: throw item;
         }
-        var awaitable = null;
-        switch(action) {
-            case "new": {
-                var value = genRandom(dir_name);
-                awaitable = add(db, dir_name, value);
-                console.log("Adding");
-                promptNext("Added", dir_name, value);
-            } break;
-            case "watch new": {
-                console.log("Watching...");
-                var nextid = (await db.ref("/"+dir_name+"/NextId").get()).val();
-                var new_item = await new Promise(resolve => {
-                    var ref = db.ref("/"+dir_name+"/"+nextid);
-                    var cb = ref.on('value', data => {
-                        if(data.val() === null) return;
-                        ref.off('value', cb);
-                        resolve(data.val());
+        for(var i = 0; i < (do_forever ? i + 1 : reps); ++i) {
+            flushExtra();
+            var awaitable = null;
+            switch(action) {
+                case "new": {
+                    if(interactive) console.log("Adding");
+                    var value = genRandom(dir_name);
+                    awaitable = add(db, dir_name, value);
+                    promptNext("Added", dir_name, value);
+                } break;
+                case "remove": {
+                    if(interactive) console.log("Removing");
+                    var id = await getRandomId(db, dir_name);
+                    awaitable = remove(db, dir_name, id);
+                    promptNext("Removed", dir_name, "with id", id);
+                } break;
+                case "watch new": {
+                    if(interactive) console.log("Watching...");
+                    var nextid = (await db.ref("/"+dir_name+"/NextId").get()).val();
+                    var new_item = await new Promise(resolve => {
+                        var ref = db.ref("/"+dir_name+"/"+nextid);
+                        var cb = ref.on('value', data => {
+                            if(data.val() === null) return;
+                            ref.off('value', cb);
+                            resolve(data.val());
+                        });
                     });
-                });
-                promptNext("Someone added", dir_name, new_item);
-            } break;
-            //case "remove": removeRandom(db, dir_name); break;
+                    promptNext("Someone added", dir_name, new_item);
+                } break;
+                case "watch remove": {
+                    if(interactive) console.log("Watching...");
+                    var old_item = await new Promise(resolve => {
+                        var ref = db.ref("/"+dir_name);
+                        var cb = ref.on('child_removed', data => {
+                            if(data.val() === null) return;
+                            ref.off('child_removed', cb);
+                            resolve(data.val());
+                        });
+                    });
+                    promptNext("Someone removed", dir_name, old_item);
+                } break;
+            }
+            if(awaitable !== null) {
+                if(interactive) console.log("...");
+                await awaitable;
+            }
         }
-        if(awaitable !== null) {
-            console.log("...");
-            await awaitable;
-        }
-        console.clear();
+        if(interactive) console.clear();
         doPrompt();
     }
 }
