@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
 
+    <link href="style.css" rel="stylesheet"></link>
+
     <!-- The Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.3.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.3.0/firebase-database.js"></script>
@@ -39,79 +41,84 @@
         </script>
     </div>
 
-    <form>
-        <p>Add order</p>
-        <label>Order id
-            <input type="number" id="orderId">
-        </label>
-        <br>
-        <label>Product
+    <form class="AddForm">
+        <p>Add new order</p>
+        <label>Select product: 
             <select id="addOrderProductId"></select>
             <script>
                 database.ref("Product").on("child_added", data => {
+                    if(data.key === "NextId") return;
                     $("#addOrderProductId").append(`<option value="${data.val().ProductId}"> ${data.val().ProductCode} </option>`);
                 });
                 database.ref("Product").on("child_removed", data => {
+                    if(data.key === "NextId") return;
                     $(`#addOrderProductId > option[value=${data.val().ProductId}]`).remove();
                 });
             </script>
         </label>
-        <br>
-        <label>Quantity
+        <label>Enter quantity: 
             <input type="number" id="quantity">
         </label>
-        <br>
         <button id="addOrderBtn">Add</button>
     </form>
 
-    <form>
-        <p>Add product</p>
-        <label>Product ID
-            <input type="number" id="addProdId">
+    <form class="AddForm">
+        <p>Add new product</p>
+        <label>Enter product code: 
+            <input type="text" id="addProdCode">
         </label>
-        <br>
-        <label>Product Code
-            <input type="number" id="addProdCode">
-        </label>
-        <br>
-        <label>Quantity
+        <label>Enter quantity: 
             <input type="number" id="addProdQuantity">
         </label>
-        <br>
-        <label>Price
+        <label>Enter price: 
             <input type="number" id="addProdPrice">
         </label>
-        <br>
         <button id="addProductBtn">Add product</button>
     </form>
-
-    <form>
-        <p>Add suplier</p>
-        <label>Supplier ID
-            <input type="number" id="supplierId">
-        </label>
-        <br>
-        <label>Name
+    <br>
+    <form class="AddForm">
+        <p>Add new suplier</p>
+        <label>Enter name: 
             <input type="text" id="supplierName">
         </label>
-        <br>
-        <label>Phone
+        <label>Enter phone number: 
             <input type="number" id="supplierNumber">
         </label>
-        <br>
         <button id="addSupplierBtn">Add supplier</button>
     </form>
     
-    <form>
-        <p>Add product supplier</p>
-        <label>ProductId
-            <input type="number" id="productSupplierProductId">
+    <form class="AddForm">
+        <p>Add new product-supplier </p>
+        <label>Select product: 
+            <select id="productSupplierProductId"></select>
+            <script>
+                database.ref("Product").on("child_added", data => {
+                    if(data.key === "NextId") return;
+                    $("#productSupplierProductId").append(`<option value="${data.val().ProductId}"> ${data.val().ProductCode} </option>`);
+                });
+                database.ref("Product").on("child_removed", data => {
+                    if(data.key === "NextId") return;
+                    $(`#productSupplierProductId > option[value=${data.val().ProductId}]`).remove();
+                });
+                database.ref("ProductSupplier").on("child_added", data => {
+                    if(data.key === "NextId") return;
+                    $(`#productSupplierProductId > option[value=${data.val().ProductId}]`).remove();
+                });
+            </script>
         </label>
-        <br>
-        <label>SupplierID
-            <input type="number" id="productSupplierSupplierId">
+        <label>Select supplier: 
+            <select id="productSupplierSupplierId"></select>
+            <script>
+                database.ref("Supplier").on("child_added", data => {
+                    if(data.key === "NextId") return;
+                    $("#productSupplierSupplierId").append(`<option value="${data.val().SupplierId}"> ${data.val().Name} </option>`);
+                });
+                database.ref("Supplier").on("child_removed", data => {
+                    if(data.key === "NextId") return;
+                    $(`#productSupplierSupplierId > option[value=${data.val().SupplierId}]`).remove();
+                });
+            </script>
         </label>
-        <br>
         <button id="addProductSupplierBtn">Add Product Supplier</button>
     </form>
 

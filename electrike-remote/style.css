@@ -1,0 +1,22 @@
+
+form.AddForm {
+    display: inline-block;
+    border: 1px solid black;
+    margin: 10px;
+    padding: 2px;
+    max-width: max-content;
+}
+
+form.AddForm label {
+    display: flex;
+    flex-flow: row wrap;
+}
+form.AddForm input, form.AddForm select {
+    min-width: 30%;
+    max-width: 50%;
+    margin-left: auto;
+}
+
+form.AddForm button {
+    margin: 5px;
+}
