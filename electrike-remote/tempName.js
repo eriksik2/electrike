@@ -76,3 +76,14 @@ async function addProductSupplier(productId, supplierId) {
         ProductId: parseInt(productId)
     });
 }
+
+async function remove(type, id) {
+    var db_ref = database.ref("/"+type+"/"+id);
+    await db_ref.set(null);
+}
+
+async function modify(type, id, value) {
+    var db_ref = database.ref("/"+type+"/"+id);
+    value[type+"Id"] = parseInt(id);
+    await db_ref.set(value);
+}
