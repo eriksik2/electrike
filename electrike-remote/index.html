@@ -29,9 +29,9 @@
             var num_products = 0;
             var num_Orders = 0;
             var num_Suppliers = 0;
-            var updateNumProducts = amnt => $(".NumProducts").html(num_products = num_products + amnt);
-            var updateNumOrders = amnt => $(".NumOrders").html(num_Orders = num_Orders + amnt);
-            var updateNumSuppliers = amnt => $(".NumSuppliers").html(num_Suppliers = num_Suppliers + amnt);
+            var updateNumProducts = amnt => $(".NumProducts").html((num_products = num_products + amnt) - 1);
+            var updateNumOrders = amnt => $(".NumOrders").html((num_Orders = num_Orders + amnt) - 1);
+            var updateNumSuppliers = amnt => $(".NumSuppliers").html((num_Suppliers = num_Suppliers + amnt) - 1);
             database.ref("Product").on("child_added", child => updateNumProducts(1));
             database.ref("Product").on("child_removed", child => updateNumProducts(-1));
             database.ref("Order").on("child_added", child => updateNumOrders(1));

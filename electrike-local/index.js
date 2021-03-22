@@ -117,35 +117,33 @@ async function main() {
         flushExtra();
         process.stdout.write(">> ");
     };
-    var doInitPrompt = () => {
+    var doHelpPrompt = () => {
         console.log("Avaliable actions:");
-        console.log(" help");
-        console.log("\t Show this screen.");
-        console.log(" new [item] [reps]");
-        console.log("\t Add a random new item.");
-        console.log(" remove [item] [reps]");
-        console.log("\t Remove a random item [reps] times.");
-        console.log(" watch new [item] [reps]");
-        console.log("\t Print out the next [reps] items that gets added.");
-        console.log(" watch remove [item] [reps]");
-        console.log("\t Print out the next [reps] items that gets removed.");
-        console.log(" [item] can be one of:");
+        console.log(" add [type] [reps]");
+        console.log("\t Add [reps] new randomly generated items of [type].");
+        console.log(" remove [type] [reps]");
+        console.log("\t Remove a random selection of [reps] items of [type].");
+        console.log(" watch add [type] [reps]");
+        console.log("\t Print out the next [reps] items of [type] that gets added.");
+        console.log(" watch remove [type] [reps]");
+        console.log("\t Print out the next [reps] items of [type] that gets removed.");
+        console.log(" [type] can be one of:");
         console.log("\t | order | product | supplier | product supplier |");
         console.log("\t | o     | p       | s        | ps               |");
         console.log(" [reps] can be either \"forever\", \"N times\", (N is an arbitrary number)");
-        console.log("\t or not specified, in which case it defaults to \"1 times\".");
+        console.log(" If [reps] is not specified, the command runs once.");
     };
     var doFailPrompt = () => {
-        doInitPrompt();
+        doHelpPrompt();
         console.log("Try again");
     };
     console.clear();
-    doInitPrompt();
+    console.log("Type help to see commands.");
     doPrompt();
     var did_batch_last = false;
     for await(var line of rl) {
         line = line.toLowerCase();
-        var regex = line.match(/^\s*(?:(new|remove|watch new|watch remove)\s*(order|product|supplier|product supplier|o|p|s|ps)|help)\s*(forever|[0-9]+\s*times)?\s*$/);
+        var regex = line.match(/^\s*(?:(add|remove|watch add|watch remove)\s*(orders?|products?|suppliers?|product suppliers?|o|p|s|ps)|help)\s*(forever|[0-9]+\s*times?)?\s*$/);
         if(regex === null) {
             console.clear();
             doFailPrompt();
@@ -154,7 +152,7 @@ async function main() {
         }
         if(regex[0] == "help") {
             console.clear();
-            doInitPrompt();
+            doHelpPrompt();
             doPrompt();
             continue;
         }
@@ -163,16 +161,25 @@ async function main() {
         var reps = regex[3] || 1;
         var do_forever = reps === "forever";
         reps = parseInt(reps);
+        if(reps < 1) {
+            console.log("What a classic. :|");
+            doPrompt();
+            continue;
+        }
         var interactive = reps == 1;
         var dir_name;
         switch(item) {
             case "order":
+            case "orders":
             case "o": dir_name = "Order"; break;
             case "product":
+            case "products":
             case "p": dir_name = "Product"; break;
             case "supplier":
+            case "suppliers":
             case "s": dir_name = "Supplier"; break;
             case "product supplier":
+            case "product suppliers":
             case "ps": dir_name = "ProductSupplier"; break;
             default: throw item;
         }
@@ -180,7 +187,7 @@ async function main() {
             flushExtra();
             var awaitable = null;
             switch(action) {
-                case "new": {
+                case "add": {
                     if(interactive) console.log("Adding");
                     var value = genRandom(dir_name);
                     awaitable = add(db, dir_name, value);
@@ -189,10 +196,22 @@ async function main() {
                 case "remove": {
                     if(interactive) console.log("Removing");
                     var id = await getRandomId(db, dir_name);
+                    if(id == undefined) {
+                        // block until there are items.
+                        await new Promise(resolve => {
+                            var ref = db.ref("/"+dir_name);
+                            var cb = ref.on('child_added', data => {
+                                if(data.key === "NextId") return;
+                                id = parseInt(data.key);
+                                ref.off('child_added', cb);
+                                resolve();
+                            });
+                        });
+                    }
                     awaitable = remove(db, dir_name, id);
                     promptNext("Removed", dir_name, "with id", id);
                 } break;
-                case "watch new": {
+                case "watch add": {
                     if(interactive) console.log("Watching...");
                     var nextid = (await db.ref("/"+dir_name+"/NextId").get()).val();
                     var new_item = await new Promise(resolve => {
