@@ -121,17 +121,19 @@ async function main() {
         console.log("Avaliable actions:");
         console.log(" help");
         console.log("\t Show this screen.");
-        console.log(" new [item]");
+        console.log(" new [item] [reps]");
         console.log("\t Add a random new item.");
-        console.log(" remove [item]");
-        console.log("\t Remove a random item.");
-        console.log(" watch new [item]");
-        console.log("\t Print out the next item that gets added.");
-        console.log(" watch remove [item]");
-        console.log("\t Print out the next item that gets removed.");
+        console.log(" remove [item] [reps]");
+        console.log("\t Remove a random item [reps] times.");
+        console.log(" watch new [item] [reps]");
+        console.log("\t Print out the next [reps] items that gets added.");
+        console.log(" watch remove [item] [reps]");
+        console.log("\t Print out the next [reps] items that gets removed.");
         console.log(" [item] can be one of:");
-        console.log("\t order | product | supplier | product supplier");
-        console.log("\t o     | p       | s        | ps");
+        console.log("\t | order | product | supplier | product supplier |");
+        console.log("\t | o     | p       | s        | ps               |");
+        console.log(" [reps] can be either \"forever\", \"N times\", (N is an arbitrary number)");
+        console.log("\t or not specified, in which case it defaults to \"1 times\".");
     };
     var doFailPrompt = () => {
         doInitPrompt();
